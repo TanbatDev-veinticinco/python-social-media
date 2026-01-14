@@ -1,0 +1,1 @@
+### The mini social feed application built with FastAPI
