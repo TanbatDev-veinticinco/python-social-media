@@ -1,1 +1,1 @@
-# python-social-media
+### The mini social feed application built with FastAPI
