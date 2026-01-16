@@ -22,6 +22,16 @@ def get_all_users():
     all_users = UserService.get_all_users()
     return all_users
 
+#POST /posts/{post_id}/like
+@auth_router.post("/posts/{post_id}/like")
+def like_post(post_id: int):
+    for post in posts:
+        if post["id"] == post_id:
+            post["likes"] += 1
+            return {"message": "Post liked", "likes": post["likes"]}
+
+    raise HTTPException(status_code=404, detail="Post not found")
+
 #GET: a user by either their unique username or email
 @auth_router.get("/user", response_model=UserOut)
 def get_user(username: Optional[str] = None, email: Optional[str] = None):
