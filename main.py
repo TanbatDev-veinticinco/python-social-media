@@ -1,13 +1,7 @@
 from fastapi import FastAPI
-from api.v1.auth_route import auth_router
+from routes import users, post
 
+app = FastAPI(title="Mini social media feed")
 
-app = FastAPI()
-
-app.include_router(auth_router, prefix="/users", tags=["Authentication Route"])
-
-@app.get("/")
-def root():
-    return {
-        "message": "The version 1 mini social feed application"
-    }
+app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(post.router, prefix="/posts", tags=["Posts"])
