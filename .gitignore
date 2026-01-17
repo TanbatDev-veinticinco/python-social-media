@@ -79,3 +79,4 @@ junit-report.xml
 *.gz
 *.tgz
 *.7z
+requirements.txt
