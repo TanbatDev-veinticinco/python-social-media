@@ -12,6 +12,7 @@ routers/__pycache__/
 .vscode/
 .idea/
 node_modules/
+uploads/
 dist/
 build/
 *.log
