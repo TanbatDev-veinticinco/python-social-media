@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Form, File, UploadFile
-from typing import Optional
+from typing import Optional, List
 from core.db import UPLOAD_DIR, posts_db, users_db
 from schema.schema import PostOut
 from datetime import datetime, timezone
@@ -8,18 +8,6 @@ import os
 
 post_router = APIRouter()
 
-
-#function that saves the image
-# def save_image(image: Optional[UploadFile]) -> Optional[str]:
-#     if not image:
-#         return None
-    
-#     filename = f"{len(posts_db)+1}_{image.filename}"
-#     filepath = os.path.join(UPLOAD_DIR, filename)
-
-#     with open(filepath, "wb") as buffer:
-#         buffer.write(image.file.read())
-#         return filename
 
 @post_router.post("/", response_model=PostOut, status_code=status.HTTP_201_CREATED)
 async def create_post(
@@ -67,7 +55,17 @@ async def create_post(
     return new_post
 
 
-     
+#List all posts
+@post_router.get("/", response_model=List[PostOut])
+def get_all_posts() -> List[PostOut]:
+    posts = list(posts_db.values())
+    if posts is None:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No content available")
+    return posts
+
+
+
+
 
 
 
