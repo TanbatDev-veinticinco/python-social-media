@@ -30,3 +30,6 @@ def create_user(user: UserCreate):
 
     return {"message":"User successfully registered",
             "details": {"username": new_user.username, "email": new_user.email}}
+
+
+

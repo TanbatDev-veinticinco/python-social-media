@@ -63,6 +63,26 @@ def get_all_posts() -> List[PostOut]:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No content available")
     return posts
 
+#List all posts by a user
+@post_router.get("/users/{username}/posts", response_model=List[PostOut])
+def get_users_posts(username: str)-> List[dict]:
+    provided_username = username.lower()
+    #To check if a user exists
+    user = next(
+        (u for u in users_db.values() if u.username.lower() == provided_username),
+        None
+    )
+    if user is None: 
+        raise HTTPException( status_code=404, detail=f"User '{username}' does not exist" )
+    user_posts = [
+        post for post in posts_db.values()
+        if post.user.username ==provided_username
+    ]
+    if not user_posts: 
+        raise HTTPException( status_code=404, detail=f"User '{username}' has no posts" )
+    return user_posts
+
+
 
 
 
