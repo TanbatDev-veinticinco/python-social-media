@@ -3,7 +3,11 @@ from typing import Optional
 
 class User(BaseModel):
     username: str
+    email: str
 
+class UserCreate(User):
+    password: str
+    
 class Post(BaseModel):
     id: int
     username: str
