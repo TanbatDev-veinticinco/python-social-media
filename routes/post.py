@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException, status, Form, File, UploadFile
+from fastapi import APIRouter, HTTPException, status, Form, File, UploadFile, Depends
 from typing import Optional, List
-from core.db import UPLOAD_DIR, posts_db, users_db
-from schema.schema import PostOut
+from core.db import UPLOAD_DIR, posts_db, users_db, likes_db
+from schema.schema import PostOut, UserOut
 from datetime import datetime, timezone
+from routes.users import get_current_user
 import os
 
 
 post_router = APIRouter()
+
+
 
 
 @post_router.post("/", response_model=PostOut, status_code=status.HTTP_201_CREATED)
@@ -63,24 +66,31 @@ def get_all_posts() -> List[PostOut]:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No content available")
     return posts
 
-#List all posts by a user
-@post_router.get("/users/{username}/posts", response_model=List[PostOut])
-def get_users_posts(username: str)-> List[dict]:
-    provided_username = username.lower()
-    #To check if a user exists
-    user = next(
-        (u for u in users_db.values() if u.username.lower() == provided_username),
-        None
-    )
-    if user is None: 
-        raise HTTPException( status_code=404, detail=f"User '{username}' does not exist" )
-    user_posts = [
-        post for post in posts_db.values()
-        if post.user.username ==provided_username
-    ]
-    if not user_posts: 
-        raise HTTPException( status_code=404, detail=f"User '{username}' has no posts" )
-    return user_posts
+#Like a post
+@post_router.post("/{post_id}/like")
+def like_post(post_id: str, current_user: UserOut = Depends(get_current_user)):
+    post = posts_db.get(post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {post_id} not found.")
+    #check if Like exist
+    like_key = (current_user.id, post_id)
+    if like_key in likes_db:
+        likes_db.remove(like_key)
+        post["likes_count"] -= 1
+        action="unliked"
+    else:
+        likes_db.add(like_key)
+        post["likes_count"] += 1
+        action="liked"
+
+    return {
+        "message": f"Post {action} successfully",
+        "likes_count": post["likes_count"]
+    }
+
+
+
+
 
 
 
