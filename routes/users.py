@@ -1,12 +1,10 @@
 # routes/users.py
 from fastapi import APIRouter, status, HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
-from schema.schema import UserCreate, UserOut, PostOut, UserUpdate
+from schemas.schema import UserCreate, UserOut, PostOut, UserUpdate
 from datetime import datetime, timezone
-from core.db import users_db, posts_db,users
+from core.db import users_db, posts_db
 from typing import List
-
-router = APIRouter()
 
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
@@ -91,16 +89,21 @@ def get_user(username: str):
     }
 
 @user_router.put("/{username}")
-def update_user(username:str, user: UserUpdate):
-    if username not in users:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+def update_user(username: str, user: UserUpdate):
+    db_user = next(
+        (u for u in users_db.values() if u.username == username),
+        None
+    )
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     if user.email:
-        users[username] = user.email
-    return {
-        "message": "User updated successfully",
-        "username": username,
-        "email": users[username]
-    }
+        db_user.email = user.email
+    if user.username:
+        db_user.username = user.username
+
+    return {"message": "User updated successfully"}
+
 
 @user_router.delete("/{username}")
 def delete_user(username: str):

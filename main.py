@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from routes import users, post
+from routes.users import user_router
+from routes.post import post_router
 
 app = FastAPI(title="Mini social media feed")
 
-app.include_router(users.router, prefix="/users", tags=["Users"])
-app.include_router(post.router, prefix="/posts", tags=["Posts"])
-
+app.include_router(user_router)
+app.include_router(post_router)
