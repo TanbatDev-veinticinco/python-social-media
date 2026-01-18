@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from core.db import users_db, posts_db,users
 from typing import List
 
+router = APIRouter()
 
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
@@ -115,3 +116,4 @@ def delete_user(username: str):
     return {
         "message": "User and associated posts deleted",
     }
+
