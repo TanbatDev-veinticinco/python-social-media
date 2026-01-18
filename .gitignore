@@ -12,6 +12,7 @@ routers/__pycache__/
 .vscode/
 .idea/
 node_modules/
+uploads/
 dist/
 build/
 *.log
@@ -79,3 +80,4 @@ junit-report.xml
 *.gz
 *.tgz
 *.7z
+requirements.txt
