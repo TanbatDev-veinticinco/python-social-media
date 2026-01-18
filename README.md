@@ -1,4 +1,4 @@
-### The mini social feed application built with FastAPI
+## The mini social feed application built with FastAPI
 
 Project Overview
 
