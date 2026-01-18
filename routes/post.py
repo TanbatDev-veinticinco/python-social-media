@@ -1,3 +1,6 @@
+from fastapi import APIRouter
+
+router = APIRouter()
 from fastapi import APIRouter, HTTPException, status, Form, File, UploadFile, Depends
 from typing import Optional, List
 from core.db import UPLOAD_DIR, posts_db, users_db, likes_db
