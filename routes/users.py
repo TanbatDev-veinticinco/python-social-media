@@ -1,13 +1,33 @@
-from fastapi import APIRouter, status, HTTPException
-from schema.schema import UserCreate, UserOut
+from fastapi import APIRouter, status, HTTPException,Depends
+from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
+from schema.schema import UserCreate, UserOut, PostOut
 from datetime import datetime, timezone
-from core.db import users_db
+from core.db import users_db, posts_db
+from typing import List
 
 
 
 user_router = APIRouter()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
+#A dependency to get current user
+#This dependency will work with the /posts/{post_id}/like endpoint
+def get_current_user(token: str = Depends(oauth2_scheme)) -> UserOut:
+    user = None
+    for u in users_db.values():
+        if u.username == token:
+            user = u
+            break
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+    
 @user_router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate):
     #extra  validation
@@ -31,5 +51,29 @@ def create_user(user: UserCreate):
     return {"message":"User successfully registered",
             "details": {"username": new_user.username, "email": new_user.email}}
 
+#List all posts by a user
+@user_router.get("/{username}/posts", response_model=List[PostOut])
+def get_users_posts(username: str)-> List[dict]:
+    provided_username = username.lower()
+    #To check if a user exists
+    user = next(
+        (u for u in users_db.values() if u.username.lower() == provided_username),
+        None
+    )
+    if user is None: 
+        raise HTTPException( status_code=404, detail=f"User '{username}' does not exist" )
+    user_posts = [
+        post for post in posts_db.values()
+        if post.user.username ==provided_username
+    ]
+    if not user_posts: 
+        raise HTTPException(status_code=404, detail=f"User '{username}' has no posts" )
+    return user_posts
 
 
+@user_router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = next((u for u in users_db.values() if u.username == form_data.username.lower()), None)
+    if not user:
+        return None
+    return user
