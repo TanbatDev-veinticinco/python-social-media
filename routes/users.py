@@ -22,3 +22,6 @@ def get_user_posts(username: str):
         raise HTTPException(status_code=404, detail="No posts found for this user")
 
     return user_posts
+from fastapi import APIRouter
+
+router = APIRouter()
