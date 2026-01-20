@@ -3,13 +3,10 @@ from fastapi import APIRouter, status, HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from schema.schema import UserCreate, UserOut, PostOut, UserUpdate
 from datetime import datetime, timezone
-from core.db import users_db, posts_db,users
+from core.db import users_db, posts_db
 from typing import List
 
-router = APIRouter()
-
-
-user_router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
@@ -30,7 +27,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserOut:
     return user
 
     
-@user_router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate):
     #extra  validation
     for id, details in users_db.items():
@@ -54,7 +51,7 @@ def create_user(user: UserCreate):
             "details": {"username": new_user.username, "email": new_user.email}}
 
 #List all posts by a user
-@user_router.get("/{username}/posts", response_model=List[PostOut])
+@router.get("/{username}/posts", response_model=List[PostOut])
 def get_users_posts(username: str)-> List[dict]:
     provided_username = username.lower()
     #To check if a user exists
@@ -73,7 +70,7 @@ def get_users_posts(username: str)-> List[dict]:
     return user_posts
 
 
-@user_router.post("/login")
+@router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = next((u for u in users_db.values() if u.username == form_data.username.lower()), None)
     if not user:
@@ -81,34 +78,34 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return user
 
 # Added endpoints for user details
-@user_router.get("/{username}")
+@router.get("/{username}")
 def get_user(username: str):
-    if username not in users:
+    if username not in users_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return {
         "username": username,
-        "email": users[username]
+        "email": users_db[username]
     }
 
-@user_router.put("/{username}")
+@router.put("/{username}")
 def update_user(username:str, user: UserUpdate):
-    if username not in users:
+    if username not in users_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if user.email:
-        users[username] = user.email
+        users_db[username] = user.email
     return {
         "message": "User updated successfully",
         "username": username,
-        "email": users[username]
+        "email": users_db[username]
     }
 
-@user_router.delete("/{username}")
+@router.delete("/{username}")
 def delete_user(username: str):
-    if username not in users:
+    if username not in users_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     #Remove user
-    del users[username]
+    del users_db[username]
 
     #Remove user's posts
     global posts
