@@ -14,6 +14,9 @@ class UserOut(UserBase):
     role: Optional[str] = "basic_user"
     created_at: datetime
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+
 class PostOut(BaseModel):
     id: str
     title: str
