@@ -6,7 +6,10 @@ from datetime import datetime, timezone
 from core.db import users_db, posts_db
 from typing import List
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter()
+
+
+user_router = APIRouter(prefix="/users", tags=["Users"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
@@ -87,16 +90,16 @@ def get_user(username: str):
         "email": users_db[username]
     }
 
-@router.put("/{username}")
+@user_router.put("/{username}")
 def update_user(username:str, user: UserUpdate):
-    if username not in users_db:
+    if username not in users:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if user.email:
-        users_db[username] = user.email
+        users[username] = user.email
     return {
         "message": "User updated successfully",
         "username": username,
-        "email": users_db[username]
+        "email": users[username]
     }
 
 @router.delete("/{username}")
