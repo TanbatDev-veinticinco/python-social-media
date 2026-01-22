@@ -4,7 +4,7 @@ router = APIRouter()
 from fastapi import APIRouter, HTTPException, status, Form, File, UploadFile, Depends
 from typing import Optional, List
 from core.db import UPLOAD_DIR, posts_db, users_db, likes_db
-from schema.schema import PostOut, UserOut
+from schemas.schema import PostOut, UserOut
 from datetime import datetime, timezone
 from routes.users import get_current_user
 import os

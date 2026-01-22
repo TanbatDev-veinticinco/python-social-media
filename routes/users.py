@@ -1,7 +1,7 @@
 # routes/users.py
 from fastapi import APIRouter, status, HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
-from schema.schema import UserCreate, UserOut, PostOut, UserUpdate
+from schemas.schema import UserCreate, UserOut, PostOut, UserUpdate
 from datetime import datetime, timezone
 from core.db import users_db, posts_db
 from typing import List
