@@ -88,15 +88,3 @@ def like_post(post_id: str, current_user: UserOut = Depends(get_current_user)):
         "message": f"Post {action} successfully",
         "likes_count": post["likes_count"]
     }
-
-
-
-
-
-
-
-
-
-
-
-
