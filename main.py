@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from routes import users, post
+from routes.users import user_router
+from routes.post import post_router
 
 app = FastAPI(title="Mini social media feed")
 

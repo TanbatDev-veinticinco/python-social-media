@@ -1,13 +1,13 @@
+# routes/users.py
 from fastapi import APIRouter, status, HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
-from schema.schema import UserCreate, UserOut, PostOut
+from schemas.schema import UserCreate, UserOut, PostOut, UserUpdate
 from datetime import datetime, timezone
 from core.db import users_db, posts_db
 from typing import List
 
 
-
-user_router = APIRouter()
+user_router = APIRouter(prefix="/users", tags=["Users"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
@@ -77,3 +77,46 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user:
         return None
     return user
+
+# Added endpoints for user details
+@user_router.get("/{username}")
+def get_user(username: str):
+    if username not in users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {
+        "username": username,
+        "email": users[username]
+    }
+
+@user_router.put("/{username}")
+def update_user(username: str, user: UserUpdate):
+    db_user = next(
+        (u for u in users_db.values() if u.username == username),
+        None
+    )
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.email:
+        db_user.email = user.email
+    if user.username:
+        db_user.username = user.username
+
+    return {"message": "User updated successfully"}
+
+
+@user_router.delete("/{username}")
+def delete_user(username: str):
+    if username not in users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    #Remove user
+    del users[username]
+
+    #Remove user's posts
+    global posts
+    posts[:] = [post for post in posts if post['username'] != username]
+    return {
+        "message": "User and associated posts deleted",
+    }
+
